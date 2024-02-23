@@ -1,30 +1,49 @@
-// Verwenden von ES6-Import anstelle von require
+// Using ES6 import instead of require
 import fetch from 'node-fetch';
 
-// Die URL, an die der GET-Request gesendet wird
+// URL to send the GET request to
 const url = 'https://www.carcenter-erding.de/api/mobile';
 
-// Die Funktion, die den GET-Request ausführt
-const fetchData = async () => {
-  try {
-    // Senden des GET-Requests
-    const response = await fetch(url);
-    
-    // Überprüfen, ob der Request erfolgreich war
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+// Function to execute the GET request with retry logic
+const fetchDataWithRetry = async (url, retries = 3, delay = 2000) => {
+  let lastError;
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      // Sending the GET request
+      const response = await fetch(url);
+
+      // Checking if the request was successful
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Parsing the response as JSON
+      const data = await response.json();
+
+      // Outputting the data
+      console.log(data);
+      return; // Successfully fetched data, exit function
+    } catch (error) {
+      console.error(`Attempt ${attempt}: Error fetching data`, error.message);
+      lastError = error;
+
+      // If the error is not a 504 (Gateway Timeout), break and don't retry
+      if (!error.message.includes('504')) break;
+
+      // Waiting for a specified delay before retrying
+      if (attempt < retries) {
+        console.log(`Waiting ${delay}ms before retry...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
     }
-
-    // Parsen der Antwort als JSON
-    const data = await response.json();
-
-    // Ausgeben der Daten
-    console.log(data);
-  } catch (error) {
-    // Ausgeben eines Fehlers, falls einer auftritt
-    console.error('Error fetching data:', error.message);
   }
+
+  // After all attempts, if data is still not fetched, throw the last encountered error
+  throw lastError;
 };
 
-// Aufrufen der Funktion
-fetchData();
+// Invoking the function
+fetchDataWithRetry(url)
+  .then(() => console.log('Data fetch successful'))
+  .catch(error => console.error('Final error after retries:', error.message));
