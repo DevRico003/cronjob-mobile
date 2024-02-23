@@ -5,7 +5,7 @@ import fetch from 'node-fetch';
 const url = 'https://www.carcenter-erding.de/api/mobile';
 
 // Function to execute the GET request with retry logic
-const fetchDataWithRetry = async (url, retries = 3, delay = 2000) => {
+const fetchDataWithRetry = async (url, retries = 20, delay = 5000) => {
   let lastError;
 
   for (let attempt = 1; attempt <= retries; attempt++) {
