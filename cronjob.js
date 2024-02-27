@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 
 const url = 'https://www.carcenter-erding.de/api/mobile';
 
-const fetchDataWithRetry = async (url, retries = 9999, delay = 5000) => {
+const fetchDataWithRetry = async (url, retries = 250, delay = 10000) => {
   let lastError;
 
   for (let attempt = 1; attempt <= retries; attempt++) {
