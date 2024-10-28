@@ -1,0 +1,25 @@
+name: Daily Cronjob
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Läuft täglich um 6:00 Uhr
+  workflow_dispatch:       # Ermöglicht manuelle Ausführung
+
+jobs:
+  run-cronjob:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'node'  # Verwendet die neueste Node.js Version
+          cache: 'npm'         # Aktiviert NPM-Caching
+
+      - name: Install dependencies
+        run: npm ci            # Saubere Installation der Dependencies
+
+      - name: Run cronjob
+        run: node cronjob.js
